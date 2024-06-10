@@ -1,0 +1,5 @@
+name: Grazing plan
+description: Grazing plan type and related features for farmOS.
+type: module
+package: farmOS Contrib
+core_version_requirement: ^10
