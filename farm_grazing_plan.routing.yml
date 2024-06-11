@@ -1,0 +1,13 @@
+farm_grazing_plan.add_event:
+  path: /plan/{plan}/event
+  defaults:
+    _form: Drupal\farm_grazing_plan\Form\GrazingPlanAddEventForm
+    _title_callback: Drupal\farm_grazing_plan\Form\GrazingPlanAddEventForm::title
+  requirements:
+    _entity_access: plan.update
+  options:
+    parameters:
+      plan:
+        type: entity:plan
+        bundle:
+          - grazing
