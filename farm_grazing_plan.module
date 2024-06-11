@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * The farmOS Grazing Plan module.
+ */
+
+use Drupal\farm_grazing_plan\Bundle\GrazingEvent;
+
+/**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function farm_grazing_plan_entity_bundle_info_alter(array &$bundles): void {
+  if (isset($bundles['plan_record']['grazing_event'])) {
+    $bundles['plan_record']['grazing_event']['class'] = GrazingEvent::class;
+  }
+}
