@@ -1,0 +1,6 @@
+timeline:
+  css:
+    theme:
+      css/timeline.css: { }
+  dependencies:
+    - farm_timeline/timeline

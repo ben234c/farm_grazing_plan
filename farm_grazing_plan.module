@@ -5,6 +5,8 @@
  * The farmOS Grazing Plan module.
  */
 
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
@@ -33,6 +35,41 @@ function farm_grazing_plan_entity_bundle_info_alter(array &$bundles): void {
   if (isset($bundles['plan_record']['grazing_event'])) {
     $bundles['plan_record']['grazing_event']['class'] = GrazingEvent::class;
   }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function farm_grazing_plan_plan_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+
+  // If this is not a grazing plan in full view mode, bail.
+  if (!($entity->bundle() == 'grazing' && $view_mode == 'full')) {
+    return;
+  }
+
+  // If there are no grazing event, bail.
+  if (empty(\Drupal::service('farm_grazing_plan')->getGrazingEvents($entity))) {
+    return;
+  }
+
+  // Render the grazing plan timeline.
+  $build['grazing_plan_timeline'] = \Drupal::formBuilder()->getForm('Drupal\farm_grazing_plan\Form\GrazingPlanTimelineForm', $entity);
+}
+
+/**
+ * Implements hook_farm_ui_theme_region_items().
+ */
+function farm_grazing_plan_farm_ui_theme_region_items(string $entity_type) {
+
+  // Position the grazing plan timeline in the top region.
+  if ($entity_type == 'plan') {
+    return [
+      'top' => [
+        'grazing_plan_timeline',
+      ],
+    ];
+  }
+  return [];
 }
 
 /**

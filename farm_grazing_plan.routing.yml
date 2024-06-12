@@ -1,3 +1,17 @@
+farm_grazing_plan.timeline:
+  path: /plan/{plan}/timeline
+  defaults:
+    _controller: Drupal\farm_grazing_plan\Controller\GrazingPlanTimeline::timeline
+  requirements:
+    _entity_access: plan.view
+  options:
+    parameters:
+      plan:
+        type: entity:plan
+        bundle:
+          - grazing
+      delta:
+        type: integer
 farm_grazing_plan.add_event:
   path: /plan/{plan}/event
   defaults:

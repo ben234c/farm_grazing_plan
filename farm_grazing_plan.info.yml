@@ -7,5 +7,7 @@ dependencies:
   - farm_activity
   - farm_animal
   - farm_entity
+  - farm_location
   - farm_season
+  - farm_timeline
   - plan
