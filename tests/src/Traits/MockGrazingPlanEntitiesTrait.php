@@ -138,8 +138,8 @@ trait MockGrazingPlanEntitiesTrait {
         'plan' => ['target_id' => $this->plan->id()],
         'log' => ['target_id' => $log->id()],
         'start' => $log->get('timestamp')->value,
-        'duration' => 168,
-        'recovery' => 15,
+        'duration' => 7 * 24,
+        'recovery' => 15 * 24,
       ]);
       $grazing_event->save();
     }

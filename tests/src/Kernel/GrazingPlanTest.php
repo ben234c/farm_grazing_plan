@@ -80,7 +80,7 @@ class GrazingPlanTest extends KernelTestbase {
       $this->assertEquals($this->movementLogs[$delta]->id(), $grazing_event->getLog()->id());
       $this->assertEquals($this->movementLogs[$delta]->get('timestamp')->value, $grazing_event->get('start')->value);
       $this->assertEquals(168, $grazing_event->get('duration')->value);
-      $this->assertEquals(15, $grazing_event->get('recovery')->value);
+      $this->assertEquals(360, $grazing_event->get('recovery')->value);
     }
   }
 

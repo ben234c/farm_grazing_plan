@@ -42,9 +42,9 @@ class GrazingEvent extends FarmPlanRecordType {
       ],
       'recovery' => [
         'type' => 'integer',
-        'label' => $this->t('Recovery (days)'),
+        'label' => $this->t('Recovery (hours)'),
         'min' => 1,
-        'max' => 365,
+        'max' => 8760,
       ],
     ];
     foreach ($field_info as $name => $info) {

@@ -127,7 +127,7 @@ class GrazingPlanTimeline extends ControllerBase {
         $row_values['tasks'][] = [
           'id' => 'grazing-event--recovery--' . $grazing_event->id(),
           'start' => $grazing_event->get('start')->value + ($grazing_event->get('duration')->value * 60 * 60),
-          'end' => $grazing_event->get('start')->value + ($grazing_event->get('duration')->value * 60 * 60) + ($grazing_event->get('recovery')->value * 24 * 60 * 60),
+          'end' => $grazing_event->get('start')->value + ($grazing_event->get('duration')->value * 60 * 60) + ($grazing_event->get('recovery')->value * 60 * 60),
           'meta' => [
             'stage' => 'recovery',
           ],

@@ -147,10 +147,10 @@ class GrazingPlanAddEventForm extends FormBase {
 
     $form['details']['recovery'] = [
       '#type' => 'number',
-      '#title' => $this->t('Recovery (days)'),
+      '#title' => $this->t('Recovery (hours)'),
       '#step' => 1,
       '#min' => 1,
-      '#max' => 365,
+      '#max' => 8760,
       '#default_value' => $default_values['recovery'],
     ];
 
