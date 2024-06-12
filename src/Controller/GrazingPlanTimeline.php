@@ -123,18 +123,20 @@ class GrazingPlanTimeline extends ControllerBase {
       ];
 
       // Add a task for the recovery time.
-      $row_values['tasks'][] = [
-        'id' => 'grazing-event--recovery--' . $grazing_event->id(),
-        'start' => $grazing_event->get('start')->value + ($grazing_event->get('duration')->value * 60 * 60),
-        'end' => $grazing_event->get('start')->value + ($grazing_event->get('duration')->value * 60 * 60) + ($grazing_event->get('recovery')->value * 24 * 60 * 60),
-        'meta' => [
-          'stage' => 'recovery',
-        ],
-        'classes' => [
-          'stage',
-          "stage--recovery",
-        ],
-      ];
+      if (!empty($grazing_event->get('recovery')->value)) {
+        $row_values['tasks'][] = [
+          'id' => 'grazing-event--recovery--' . $grazing_event->id(),
+          'start' => $grazing_event->get('start')->value + ($grazing_event->get('duration')->value * 60 * 60),
+          'end' => $grazing_event->get('start')->value + ($grazing_event->get('duration')->value * 60 * 60) + ($grazing_event->get('recovery')->value * 24 * 60 * 60),
+          'meta' => [
+            'stage' => 'recovery',
+          ],
+          'classes' => [
+            'stage',
+            "stage--recovery",
+          ],
+        ];
+      }
 
       // Add the row object.
       // @todo Create and instantiate a wrapper data type instead of rows.
