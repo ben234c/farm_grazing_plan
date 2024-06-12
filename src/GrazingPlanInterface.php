@@ -20,4 +20,26 @@ interface GrazingPlanInterface {
    */
   public function getGrazingEvents(PlanInterface $plan): array;
 
+  /**
+   * Get grazing events indexed by the asset(s) that their log references.
+   *
+   * @param \Drupal\plan\Entity\PlanInterface $plan
+   *   The plan entity.
+   *
+   * @return \Drupal\farm_grazing_plan\Bundle\GrazingEventInterface[]
+   *   Returns an array of plan_record entities of type grazing_event.
+   */
+  public function getGrazingEventsByAsset(PlanInterface $plan): array;
+
+  /**
+   * Get grazing events indexed by the location(s) that their log references.
+   *
+   * @param \Drupal\plan\Entity\PlanInterface $plan
+   *   The plan entity.
+   *
+   * @return \Drupal\farm_grazing_plan\Bundle\GrazingEventInterface[]
+   *   Returns an array of plan_record entities of type grazing_event.
+   */
+  public function getGrazingEventsByLocation(PlanInterface $plan): array;
+
 }

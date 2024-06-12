@@ -28,11 +28,11 @@ trait MockGrazingPlanEntitiesTrait {
   protected $animalType = NULL;
 
   /**
-   * Animal asset.
+   * Animal assets.
    *
    * @var \Drupal\asset\Entity\AssetInterface[]
    */
-  protected $animalAsset = NULL;
+  protected $animalAssets = [];
 
   /**
    * Land assets.
@@ -74,14 +74,17 @@ trait MockGrazingPlanEntitiesTrait {
     ]);
     $this->animalType->save();
 
-    // Create an animal asset.
-    $this->animalAsset = Asset::create([
-      'name' => 'Sheep',
-      'type' => 'animal',
-      'animal_type' => [['target_id' => $this->animalType->id()]],
-      'status' => 'active',
-    ]);
-    $this->animalAsset->save();
+    // Create two animal assets.
+    for ($i = 1; $i <= 2; $i++) {
+      $asset = Asset::create([
+        'name' => 'Sheep ' . $i,
+        'type' => 'animal',
+        'animal_type' => [['target_id' => $this->animalType->id()]],
+        'status' => 'active',
+      ]);
+      $asset->save();
+      $this->animalAssets[] = $asset;
+    }
 
     // Create 5 land assets.
     for ($i = 1; $i <= 5; $i++) {
@@ -100,23 +103,25 @@ trait MockGrazingPlanEntitiesTrait {
     // Start the plan on May 1, 2024.
     $timestamp = strtotime('May 1, 2024');
 
-    // Create activity logs that move the animal to each paddock every 7 days.
-    foreach ($this->landAssets as $i => $land_asset) {
-      $log = Log::create([
-        'name' => 'Move ' . $this->animalAsset->label() . ' to ' . $land_asset->label(),
-        'type' => 'activity',
-        'timestamp' => strtotime('+7 days', $timestamp),
-        'asset' => [
-          ['target_id' => $this->animalAsset->id()],
-        ],
-        'location' => [
-          ['target_id' => $land_asset->id()],
-        ],
-        'is_movement' => TRUE,
-        'status' => 'done',
-      ]);
-      $log->save();
-      $this->movementLogs[] = $log;
+    // Create activity logs that move each animal through all paddocks.
+    foreach ($this->animalAssets as $animal_asset) {
+      foreach ($this->landAssets as $land_asset) {
+        $log = Log::create([
+          'name' => 'Move ' . $animal_asset->label() . ' to ' . $land_asset->label(),
+          'type' => 'activity',
+          'timestamp' => strtotime('+7 days', $timestamp),
+          'asset' => [
+            ['target_id' => $animal_asset->id()],
+          ],
+          'location' => [
+            ['target_id' => $land_asset->id()],
+          ],
+          'is_movement' => TRUE,
+          'status' => 'done',
+        ]);
+        $log->save();
+        $this->movementLogs[] = $log;
+      }
     }
 
     // Create a grazing plan for the season.

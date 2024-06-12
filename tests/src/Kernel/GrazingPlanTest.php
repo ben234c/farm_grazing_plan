@@ -72,7 +72,7 @@ class GrazingPlanTest extends KernelTestbase {
 
     // Test getting all grazing_event plan_record entities for a plan.
     $grazing_events = \Drupal::service('farm_grazing_plan')->getGrazingEvents($this->plan);
-    $this->assertCount(5, $grazing_events);
+    $this->assertCount(10, $grazing_events);
     usort($grazing_events, function ($a, $b) {
       return ($a->getLog()->id() < $b->getLog()->id()) ? -1 : 1;
     });
@@ -82,6 +82,35 @@ class GrazingPlanTest extends KernelTestbase {
       $this->assertEquals(168, $grazing_event->get('duration')->value);
       $this->assertEquals(360, $grazing_event->get('recovery')->value);
     }
+
+    // Test getting grazing_event records by asset.
+    $grazing_events_by_asset = \Drupal::service('farm_grazing_plan')->getGrazingEventsByAsset($this->plan);
+    $this->assertEquals(2, count($grazing_events_by_asset));
+    $log_ids = array_map(function ($log) {
+      return $log->id();
+    }, $this->movementLogs);
+    $grazing_event_log_ids = [];
+    foreach ($this->animalAssets as $animal_asset) {
+      $this->assertNotEmpty($grazing_events_by_asset[$animal_asset->id()]);
+      $this->assertCount(5, $grazing_events_by_asset[$animal_asset->id()]);
+      foreach ($grazing_events_by_asset[$animal_asset->id()] as $grazing_event) {
+        $grazing_event_log_ids[] = $grazing_event->getLog()->id();
+      }
+    }
+    $this->assertEquals($log_ids, $grazing_event_log_ids);
+
+    // Test getting grazing_event records by location.
+    $grazing_events_by_location = \Drupal::service('farm_grazing_plan')->getGrazingEventsByLocation($this->plan);
+    $this->assertEquals(5, count($grazing_events_by_location));
+    $grazing_event_log_ids = [];
+    foreach ($this->landAssets as $land_asset) {
+      $this->assertNotEmpty($grazing_events_by_location[$land_asset->id()]);
+      $this->assertCount(2, $grazing_events_by_location[$land_asset->id()]);
+      foreach ($grazing_events_by_location[$land_asset->id()] as $grazing_event) {
+        $grazing_event_log_ids[] = $grazing_event->getLog()->id();
+      }
+    }
+    $this->assertEquals(sort($log_ids), sort($grazing_event_log_ids));
   }
 
 }
