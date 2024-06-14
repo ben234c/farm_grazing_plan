@@ -6,7 +6,9 @@ use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
 use Drupal\farm_grazing_plan\GrazingPlanInterface;
+use Drupal\farm_log\AssetLogsInterface;
 use Drupal\farm_timeline\TypedData\TimelineRowDefinition;
+use Drupal\log\Entity\LogInterface;
 use Drupal\plan\Entity\PlanInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,6 +25,13 @@ class GrazingPlanTimeline extends ControllerBase {
    * @var \Drupal\farm_grazing_plan\GrazingPlanInterface
    */
   protected GrazingPlanInterface $grazingPlan;
+
+  /**
+   * The asset logs service.
+   *
+   * @var \Drupal\farm_log\AssetLogsInterface
+   */
+  protected $assetLogs;
 
   /**
    * The UUID service.
@@ -50,6 +59,8 @@ class GrazingPlanTimeline extends ControllerBase {
    *
    * @param \Drupal\farm_grazing_plan\GrazingPlanInterface $grazing_plan
    *   The grazing plan service.
+   * @param \Drupal\farm_log\AssetLogsInterface $asset_logs
+   *   The asset logs service.
    * @param \Drupal\Component\Uuid\UuidInterface $uuid_service
    *   The UUID service.
    * @param \Drupal\Core\TypedData\TypedDataManagerInterface $typed_data_manager
@@ -57,8 +68,9 @@ class GrazingPlanTimeline extends ControllerBase {
    * @param \Symfony\Component\Serializer\SerializerInterface $serializer
    *   The serializer service.
    */
-  public function __construct(GrazingPlanInterface $grazing_plan, UuidInterface $uuid_service, TypedDataManagerInterface $typed_data_manager, SerializerInterface $serializer) {
+  public function __construct(GrazingPlanInterface $grazing_plan, AssetLogsInterface $asset_logs, UuidInterface $uuid_service, TypedDataManagerInterface $typed_data_manager, SerializerInterface $serializer) {
     $this->grazingPlan = $grazing_plan;
+    $this->assetLogs = $asset_logs;
     $this->uuidService = $uuid_service;
     $this->typedDataManager = $typed_data_manager;
     $this->serializer = $serializer;
@@ -70,6 +82,7 @@ class GrazingPlanTimeline extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('farm_grazing_plan'),
+      $container->get('asset.logs'),
       $container->get('uuid'),
       $container->get('typed_data_manager'),
       $container->get('serializer'),
@@ -122,6 +135,7 @@ class GrazingPlanTimeline extends ControllerBase {
     foreach ($grazing_events_by_asset as $asset_id => $grazing_events) {
 
       // Load the asset.
+      /** @var \Drupal\asset\Entity\AssetInterface $asset */
       $asset = $this->entityTypeManager()->getStorage('asset')->load($asset_id);
 
       // Build the asset row values.
@@ -132,6 +146,34 @@ class GrazingPlanTimeline extends ControllerBase {
         'expanded' => TRUE,
         'children' => [],
       ];
+
+      // Add tasks for all logs that reference the asset.
+      $destination_url = $plan->toUrl()->toString();
+      $row_values['tasks'] = array_map(function (LogInterface $log) use ($destination_url) {
+        $edit_url = $log->toUrl('edit-form', ['query' => ['destination' => $destination_url]])->toString();
+        $log_id = $log->id();
+        $bundle = $log->bundle();
+        $status = $log->get('status')->value;
+        return [
+          'id' => $this->uuidService->generate(),
+          'label' => $log->label(),
+          'edit_url' => $edit_url,
+          'start' => $log->get('timestamp')->value,
+          'end' => $log->get('timestamp')->value + 86400,
+          'meta' => [
+            'label' => $log->label(),
+            'entity_id' => $log_id,
+            'entity_type' => 'log',
+            'entity_bundle' => $bundle,
+            'log_status' => $status,
+          ],
+          'classes' => [
+            'log',
+            "log--$bundle",
+            "log--status-$status",
+          ],
+        ];
+      }, $this->assetLogs->getLogs($asset));
 
       // Include each grazing event record.
       /** @var \Drupal\farm_grazing_plan\Bundle\GrazingEventInterface[] $grazing_events */
