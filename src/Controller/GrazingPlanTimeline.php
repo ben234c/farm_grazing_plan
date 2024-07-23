@@ -5,6 +5,7 @@ namespace Drupal\farm_grazing_plan\Controller;
 use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
+use Drupal\farm_grazing_plan\Bundle\GrazingEventInterface;
 use Drupal\farm_grazing_plan\GrazingPlanInterface;
 use Drupal\farm_log\AssetLogsInterface;
 use Drupal\farm_timeline\TypedData\TimelineRowDefinition;
@@ -148,31 +149,8 @@ class GrazingPlanTimeline extends ControllerBase {
       ];
 
       // Add tasks for all logs that reference the asset.
-      $destination_url = $plan->toUrl()->toString();
-      $row_values['tasks'] = array_map(function (LogInterface $log) use ($destination_url) {
-        $edit_url = $log->toUrl('edit-form', ['query' => ['destination' => $destination_url]])->toString();
-        $log_id = $log->id();
-        $bundle = $log->bundle();
-        $status = $log->get('status')->value;
-        return [
-          'id' => $this->uuidService->generate(),
-          'label' => $log->label(),
-          'edit_url' => $edit_url,
-          'start' => $log->get('timestamp')->value,
-          'end' => $log->get('timestamp')->value + 86400,
-          'meta' => [
-            'label' => $log->label(),
-            'entity_id' => $log_id,
-            'entity_type' => 'log',
-            'entity_bundle' => $bundle,
-            'log_status' => $status,
-          ],
-          'classes' => [
-            'log',
-            "log--$bundle",
-            "log--status-$status",
-          ],
-        ];
+      $row_values['tasks'] = array_map(function (LogInterface $log) use ($plan) {
+        return $this->buildLogTask($plan, $log);
       }, $this->assetLogs->getLogs($asset));
 
       // Include each grazing event record.
@@ -240,12 +218,36 @@ class GrazingPlanTimeline extends ControllerBase {
     }
 
     // Add a task for the movement log.
-    $destination_url = $grazing_event->get('plan')->first()?->entity->toUrl()->toString();
+    $plan = $grazing_event->get('plan')->first()?->entity;
+    $tasks[] = $this->buildLogTask($plan, $log);
+
+    // Assemble the grazing event row.
+    return [
+      'id' => $this->uuidService->generate(),
+      'label' => $log->label(),
+      'link' => $log->toLink($log->label(), 'canonical')->toString(),
+      'tasks' => $tasks,
+    ];
+  }
+
+  /**
+   * Helper function for building a single log task.
+   *
+   * @param \Drupal\plan\Entity\PlanInterface $plan
+   *   The plan entity.
+   * @param \Drupal\log\Entity\LogInterface $log
+   *   The log entity.
+   *
+   * @return array
+   *   Returns an array representing a single log task.
+   */
+  protected function buildLogTask(PlanInterface $plan, LogInterface $log) {
+    $destination_url = $plan->toUrl()->toString();
     $edit_url = $log->toUrl('edit-form', ['query' => ['destination' => $destination_url]])->toString();
     $log_id = $log->id();
     $bundle = $log->bundle();
     $status = $log->get('status')->value;
-    $tasks[] = [
+    return [
       'id' => $this->uuidService->generate(),
       'label' => $log->label(),
       'edit_url' => $edit_url,
@@ -263,14 +265,6 @@ class GrazingPlanTimeline extends ControllerBase {
         "log--$bundle",
         "log--status-$status",
       ],
-    ];
-
-    // Assemble the grazing event row.
-    return [
-      'id' => $this->uuidService->generate(),
-      'label' => $log->label(),
-      'link' => $log->toLink($log->label(), 'canonical')->toString(),
-      'tasks' => $tasks,
     ];
   }
 
