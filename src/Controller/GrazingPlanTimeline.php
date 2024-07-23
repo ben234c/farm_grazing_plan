@@ -239,6 +239,32 @@ class GrazingPlanTimeline extends ControllerBase {
       ];
     }
 
+    // Add a task for the movement log.
+    $destination_url = $grazing_event->get('plan')->first()?->entity->toUrl()->toString();
+    $edit_url = $log->toUrl('edit-form', ['query' => ['destination' => $destination_url]])->toString();
+    $log_id = $log->id();
+    $bundle = $log->bundle();
+    $status = $log->get('status')->value;
+    $tasks[] = [
+      'id' => $this->uuidService->generate(),
+      'label' => $log->label(),
+      'edit_url' => $edit_url,
+      'start' => $log->get('timestamp')->value,
+      'end' => $log->get('timestamp')->value + 86400,
+      'meta' => [
+        'label' => $log->label(),
+        'entity_id' => $log_id,
+        'entity_type' => 'log',
+        'entity_bundle' => $bundle,
+        'log_status' => $status,
+      ],
+      'classes' => [
+        'log',
+        "log--$bundle",
+        "log--status-$status",
+      ],
+    ];
+
     // Assemble the grazing event row.
     return [
       'id' => $this->uuidService->generate(),
