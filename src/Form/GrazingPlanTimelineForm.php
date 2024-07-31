@@ -5,6 +5,7 @@ namespace Drupal\farm_grazing_plan\Form;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\farm_grazing_plan\GrazingPlanInterface;
 use Drupal\plan\Entity\PlanInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -107,14 +108,12 @@ class GrazingPlanTimelineForm extends FormBase {
     $display_mode = $form_state->getValue('mode', $mode_default);
 
     // Render the timeline.
+    $row_url = Url::fromRoute("farm_grazing_plan.timeline_by_$display_mode", ['plan' => $plan->id()]);
     $form['timeline']['gantt'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'div',
+      '#type' => 'farm_timeline',
+      '#rows' => [$row_url->setAbsolute()->toString()],
       '#attributes' => [
-        'id' => 'timeline',
         'data-table-header' => $this->t('Grazing events (by @type)', ['@type' => $mode_options[$display_mode]]),
-        'data-timeline-url' => 'plan/' . $plan->id() . '/timeline/' . $display_mode,
-        'data-timeline-instantiator' => 'farm_grazing_plan',
       ],
       '#attached' => [
         'library' => ['farm_grazing_plan/timeline'],
