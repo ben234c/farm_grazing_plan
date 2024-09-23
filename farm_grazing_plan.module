@@ -73,6 +73,20 @@ function farm_grazing_plan_farm_ui_theme_region_items(string $entity_type) {
 }
 
 /**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function farm_grazing_plan_form_plan_record_grazing_event_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+  // Hide plan and log fields in grazing_event edit forms.
+  if (!empty($form['plan'])) {
+    $form['plan']['#access'] = FALSE;
+  }
+  if (!empty($form['log'])) {
+    $form['log']['#access'] = FALSE;
+  }
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
  */
 function farm_grazing_plan_form_quick_form_movement_alter(&$form, FormStateInterface $form_state, $form_id) {
