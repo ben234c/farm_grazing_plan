@@ -187,9 +187,14 @@ class GrazingPlanTimeline extends ControllerBase {
     // Start a list of tasks.
     $tasks = [];
 
+    // Generate a link for editing the grazing event.
+    $destination_url = $grazing_event->get('plan')->referencedEntities()[0]->toUrl()->toString();
+    $edit_url = $grazing_event->toUrl('edit-form', ['query' => ['destination' => $destination_url]])->toString();
+
     // Add a task for the grazing event duration.
     $tasks[] = [
       'id' => 'grazing-event--duration--' . $grazing_event->id(),
+      'edit_url' => $edit_url,
       'start' => $grazing_event->get('start')->value,
       'end' => $grazing_event->get('start')->value + ($grazing_event->get('duration')->value * 60 * 60),
       'meta' => [
@@ -205,6 +210,7 @@ class GrazingPlanTimeline extends ControllerBase {
     if (!empty($grazing_event->get('recovery')->value)) {
       $tasks[] = [
         'id' => 'grazing-event--recovery--' . $grazing_event->id(),
+        'edit_url' => $edit_url,
         'start' => $grazing_event->get('start')->value + ($grazing_event->get('duration')->value * 60 * 60),
         'end' => $grazing_event->get('start')->value + ($grazing_event->get('duration')->value * 60 * 60) + ($grazing_event->get('recovery')->value * 60 * 60),
         'meta' => [
