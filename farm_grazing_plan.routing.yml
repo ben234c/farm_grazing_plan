@@ -1,5 +1,5 @@
 farm_grazing_plan.timeline_by_asset:
-  path: /plan/{plan}/timeline/asset
+  path: /plan/{plan}/grazing/timeline/asset
   defaults:
     _controller: Drupal\farm_grazing_plan\Controller\GrazingPlanTimeline::byAsset
   requirements:
@@ -13,7 +13,7 @@ farm_grazing_plan.timeline_by_asset:
       delta:
         type: integer
 farm_grazing_plan.timeline_by_location:
-  path: /plan/{plan}/timeline/location
+  path: /plan/{plan}/grazing/timeline/location
   defaults:
     _controller: Drupal\farm_grazing_plan\Controller\GrazingPlanTimeline::byLocation
   requirements:
@@ -27,7 +27,7 @@ farm_grazing_plan.timeline_by_location:
       delta:
         type: integer
 farm_grazing_plan.add_event:
-  path: /plan/{plan}/event
+  path: /plan/{plan}/grazing/event
   defaults:
     _form: Drupal\farm_grazing_plan\Form\GrazingPlanAddEventForm
     _title_callback: Drupal\farm_grazing_plan\Form\GrazingPlanAddEventForm::title
